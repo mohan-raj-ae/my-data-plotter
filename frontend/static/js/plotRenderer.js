@@ -267,27 +267,4 @@ class PlotRenderer {
             filename: filename
         });
     }
-    
-    async exportAsPDF() {
-        if (!this.plotlyDiv || !this.currentPlot) {
-            throw new Error('No plot to export');
-        }
-        
-        const imgData = await Plotly.toImage(this.plotlyDiv, {
-            format: 'png',
-            width: 1200,
-            height: 800
-        });
-        
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('landscape');
-        
-        const imgWidth = 280;
-        const imgHeight = 160;
-        const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2;
-        const y = 20;
-        
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        pdf.save('plot_export.pdf');
-    }
 }
