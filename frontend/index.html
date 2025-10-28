@@ -1,197 +1,818 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIDP Enhanced - Data Plotter</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIDP Enhanced - Interactive Data Plotter</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+    }
+    .card {
+      background-color: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      padding: 1.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background-color: #4f46e5;
+      color: white;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background-color: #4338ca;
+    }
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: #1e293b;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #cbd5e1;
+    }
+    .btn-green {
+        background-color: #16a34a; 
+        color: white;
+    }
+    .btn-green:hover:not(:disabled) {
+        background-color: #15803d;
+    }
+    .btn-purple {
+        background-color: #9333ea; 
+        color: white;
+    }
+    .btn-purple:hover:not(:disabled) {
+        background-color: #7e22ce;
+    }
+    .tab {
+      padding: 0.5rem 1.25rem;
+      background: #e2e8f0;
+      border-radius: 0.5rem 0.5rem 0 0;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 500;
+      color: #475569;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .tab.active {
+      background: white;
+      color: #4f46e5;
+      font-weight: 700;
+      border-color: #4f46e5;
+    }
+    #tabsContainer {
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+    .file-input-wrapper input[type=file] {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+        font-style: italic;
+    }
+    #notification-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .notification {
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+        min-width: 320px;
+        max-width: 400px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        transform: translateX(120%);
+        animation: slideIn 0.5s forwards, slideOut 0.5s 4.5s forwards;
+    }
+    .notification-success { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+    .notification-error { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+    .notification-icon { flex-shrink: 0; }
+    .notification-content p { margin: 0; }
+    .notification-title { font-weight: 600; }
+    .notification-success .notification-title { color: #15803d; }
+    .notification-error .notification-title { color: #b91c1c; }
+    .notification-message { color: #374151; font-size: 0.9rem; }
+
+    @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+    @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(120%); } }
+  </style>
 </head>
-<body class="bg-gray-50">
-    <div class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">Data Visualization Tool</h1>
-        
-        <!-- Controls -->
-        <div class="bg-white p-6 rounded-lg shadow mb-6">
-            <div class="grid grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">X-Axis</label>
-                    <select id="xAxis" class="w-full p-2 border rounded">
-                        <option value="">Select...</option>
-                    </select>
+<body class="text-slate-700">
+
+  <!-- Notification Container -->
+  <div id="notification-container"></div>
+
+  <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-screen-2xl">
+    <header class="mb-6 text-center">
+      <h1 class="text-4xl font-bold text-slate-900">AIDP Enhanced - Interactive Data Plotter</h1>
+      <p class="text-slate-600 mt-2 max-w-3xl mx-auto">
+        Load, visualize, and analyze your data with advanced plotting capabilities. Copy-paste data or upload files.
+      </p>
+    </header>
+
+    <div class="flex flex-col gap-6">
+      <!-- Top Section: Plotting Area -->
+      <div class="card flex flex-col flex-grow">
+          <div id="tabsContainer" class="tabs"></div>
+          <div id="plot" class="flex-grow min-h-[600px] w-full mt-4"></div>
+        </div>
+
+      <!-- Bottom Section: Settings & Controls -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Data Input & Actions -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            <div class="card">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">1. Load Data</h2>
+            <div class="flex-grow">
+                <label for="dataInput" class="block font-medium mb-1 text-sm">Paste Tab-Delimited Data:</label>
+                <textarea id="dataInput" spellcheck="false" aria-label="Raw tab delimited data input" class="w-full h-48 p-2 border border-slate-300 rounded-lg font-mono text-sm resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Paste your data here (tab or comma separated)..."></textarea>
+            </div>
+            <div class="mt-4 flex flex-col gap-3">
+                <div class="file-input-wrapper btn btn-secondary w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    <span>Upload a File (.tsv, .csv, .txt)</span>
+                    <input type="file" accept=".txt,.tsv,.csv" id="fileInput" />
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Y-Axis</label>
-                    <select id="yAxis" class="w-full p-2 border rounded">
-                        <option value="">Select...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Group By</label>
-                    <select id="groupBy" class="w-full p-2 border rounded">
-                        <option value="">None</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Chart Type</label>
-                    <select id="chartType" class="w-full p-2 border rounded">
-                        <option value="scatter">Scatter</option>
-                        <option value="line">Line</option>
-                        <option value="bar">Bar</option>
-                        <option value="box">Box</option>
-                    </select>
+                <button id="loadDataBtn" class="btn btn-primary w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                    <span>Load Data</span>
+                </button>
+                <button id="loadSampleBtn" class="btn btn-secondary w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    <span>Load Sample Data</span>
+                </button>
+            </div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">Actions</h2>
+                <div class="flex flex-col gap-3">
+                    <button id="exportPlotBtn" class="btn btn-green w-full" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        <span>Export Plot as PNG</span>
+                    </button>
+                    <button id="addPlotTabBtn" class="btn btn-purple w-full" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Add Plot Tab</span>
+                    </button>
                 </div>
             </div>
-            <button id="updatePlot" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Update Plot
-            </button>
         </div>
-        
-        <!-- File Upload -->
-        <div class="bg-white p-6 rounded-lg shadow mb-6">
-            <h3 class="text-lg font-semibold mb-4">Upload Data</h3>
-            <input type="file" id="fileInput" accept=".csv" class="mb-2">
-            <button id="loadDemo" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ml-2">
-                Load Demo Data
-            </button>
+
+        <!-- Right Column: Plotting Configuration -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            <div class="card">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">2. Configure Plot</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                    <label for="xAxisSelect" class="block font-medium mb-1 text-sm">X-Axis:</label>
+                    <select id="xAxisSelect" disabled class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
+                    </div>
+                    <div>
+                    <label for="leftYAxisSelect" class="block font-medium mb-1 text-sm">Left Y-Axis(s):</label>
+                    <select id="leftYAxisSelect" disabled multiple class="w-full border border-slate-300 rounded-md p-2 h-28 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
+                    </div>
+                    <div>
+                    <label for="rightYAxisSelect" class="block font-medium mb-1 text-sm">Right Y-Axis(s):</label>
+                    <select id="rightYAxisSelect" disabled multiple class="w-full border border-slate-300 rounded-md p-2 h-28 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
+                    </div>
+                    <div>
+                    <label for="groupingSelect" class="block font-medium mb-1 text-sm">Group By:</label>
+                    <select id="groupingSelect" multiple disabled class="w-full border border-slate-300 rounded-md p-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
+                    </div>
+                    <div class="lg:col-span-2">
+                    <label for="chartTypeSelect" class="block font-medium mb-1 text-sm">Plot Type:</label>
+                    <select id="chartTypeSelect" disabled class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="box" selected>Box Plot</option>
+                        <option value="violin">Violin Plot</option>
+                        <option value="bar">Bar Plot</option>
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="line">Line Plot</option>
+                    </select>
+                    <div class="flex items-center mt-4" id="outlierToggleContainer">
+                        <input type="checkbox" id="outlierToggle" disabled class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked />
+                        <label for="outlierToggle" class="ml-2 block text-sm font-medium text-slate-700">Show Outliers</label>
+                    </div>
+                    <div class="flex items-center mt-2" id="dataPointsToggleContainer">
+                        <input type="checkbox" id="showDataPointsToggle" disabled class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                        <label for="showDataPointsToggle" class="ml-2 block text-sm font-medium text-slate-700">Show Data Point Count (n)</label>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">3. Filters</h2>
+                <div id="filtersContainer" class="filter-group">
+                    <div class="empty-state">Load data to see available filters.</div>
+                </div>
+            </div>
         </div>
-        
-        <!-- Plot Area -->
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div id="plotDiv" style="height: 600px;"></div>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        let currentData = [];
-        let columns = [];
+  <script>
+    const { jsPDF } = window.jspdf;
 
-        // Demo data
-        const demoData = [
-            {Displacement: 0.1, Load: 150, Temperature: 25, Adhesive: "Fuller", TestCase: "RT"},
-            {Displacement: 0.2, Load: 310, Temperature: 25, Adhesive: "Fuller", TestCase: "RT"},
-            {Displacement: 0.3, Load: 450, Temperature: 25, Adhesive: "Fuller", TestCase: "RT"},
-            {Displacement: 0.4, Load: 620, Temperature: 25, Adhesive: "Fuller", TestCase: "RT"},
-            {Displacement: 0.5, Load: 780, Temperature: 25, Adhesive: "Fuller", TestCase: "RT"},
-            {Displacement: 0.1, Load: 120, Temperature: -40, Adhesive: "Sika", TestCase: "Cold"},
-            {Displacement: 0.2, Load: 250, Temperature: -40, Adhesive: "Sika", TestCase: "Cold"},
-            {Displacement: 0.3, Load: 380, Temperature: -40, Adhesive: "Sika", TestCase: "Cold"},
-            {Displacement: 0.4, Load: 510, Temperature: -40, Adhesive: "Sika", TestCase: "Cold"},
-            {Displacement: 0.5, Load: 630, Temperature: -40, Adhesive: "Sika", TestCase: "Cold"}
-        ];
+    // --- State Management ---
+    let parsedData = [];
+    let headers = [];
+    let plotTabs = [];
+    let activeTabId = null;
 
-        function loadData(data) {
-            currentData = data;
-            columns = Object.keys(data[0]);
-            
-            // Populate dropdowns
-            const selects = ['xAxis', 'yAxis', 'groupBy'];
-            selects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                select.innerHTML = selectId === 'groupBy' ? '<option value="">None</option>' : '<option value="">Select...</option>';
-                
-                columns.forEach(col => {
-                    const option = document.createElement('option');
-                    option.value = col;
-                    option.textContent = col;
-                    select.appendChild(option);
-                });
+    // --- Utility Functions ---
+    const isNumericArray = (arr) => arr.every(val => val === null || val === undefined || val === '' || !isNaN(val));
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+    
+    function showNotification(title, message, type = 'success') {
+        const iconSvg = {
+            success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+            error: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+        };
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-icon">${iconSvg[type]}</div>
+            <div class="notification-content">
+                <p class="notification-title">${title}</p>
+                <p class="notification-message">${message}</p>
+            </div>
+        `;
+        document.getElementById('notification-container').appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // --- Core Application Logic ---
+
+    function parseTabDelimited(text) {
+        const lines = text.trim().split('\n').filter(line => line.trim());
+        if (lines.length < 2) throw new Error('At least one header row and one data row are required.');
+        
+        const firstLine = lines[0];
+        const delimiter = firstLine.includes('\t') ? '\t' : (firstLine.includes(',') ? ',' : ' ');
+        
+        headers = lines[0].split(delimiter).map(h => h.trim());
+        const dataRows = lines.slice(1);
+        
+        return dataRows.map(line => {
+            const parts = line.split(delimiter);
+            const obj = {};
+            headers.forEach((h, i) => {
+                let val = parts[i] ? parts[i].trim() : '';
+                const numVal = Number(val);
+                obj[h] = (val === '' || isNaN(numVal)) ? val : numVal;
             });
-            
-            // Set default values
-            document.getElementById('xAxis').value = 'Displacement';
-            document.getElementById('yAxis').value = 'Load';
-            document.getElementById('groupBy').value = 'Adhesive';
-            
-            updatePlot();
+            return obj;
+        });
+    }
+
+    function populateSelect(sel, options, multiple = false) {
+        sel.innerHTML = '';
+        sel.multiple = multiple;
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt;
+            el.textContent = opt;
+            sel.appendChild(el);
+        });
+    }
+
+    function buildFilters() {
+        const filtersContainer = document.getElementById('filtersContainer');
+        filtersContainer.innerHTML = '';
+        if (!parsedData.length) {
+            filtersContainer.innerHTML = '<div class="empty-state">Load data to see available filters.</div>';
+            return;
         }
 
-        function updatePlot() {
-            const xAxis = document.getElementById('xAxis').value;
-            const yAxis = document.getElementById('yAxis').value;
-            const groupBy = document.getElementById('groupBy').value;
-            const chartType = document.getElementById('chartType').value;
-            
-            if (!xAxis || !yAxis || currentData.length === 0) {
-                document.getElementById('plotDiv').innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">Please select X and Y axes</div>';
-                return;
+        headers.forEach(h => {
+            const colData = parsedData.map(d => d[h]).filter(v => v !== '' && v !== null && v !== undefined);
+            if (colData.length === 0) return;
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'mb-3';
+
+            if (isNumericArray(colData)) {
+                const min = Math.min(...colData);
+                const max = Math.max(...colData);
+                groupDiv.innerHTML = `
+                    <label class="font-semibold text-sm">${h} (min/max):</label>
+                    <div class="flex gap-2 mt-1">
+                        <input type="number" step="any" id="filter_min_${h}" placeholder="Min" class="w-full p-1 border border-slate-300 rounded-md" value="${min}" />
+                        <input type="number" step="any" id="filter_max_${h}" placeholder="Max" class="w-full p-1 border border-slate-300 rounded-md" value="${max}" />
+                    </div>`;
+            } else {
+                const uniqueValues = [...new Set(colData)].sort();
+                groupDiv.innerHTML = `
+                    <label class="font-semibold text-sm">${h} (select categories):</label>
+                    <select multiple id="filter_cat_${h}" class="w-full p-1 mt-1 border border-slate-300 rounded-md" size="3">
+                        ${uniqueValues.map(val => `<option value="${val}" selected>${val}</option>`).join('')}
+                    </select>`;
             }
-            
-            let traces = [];
-            
-            if (groupBy && groupBy !== '') {
-                // Group data
-                const groups = {};
-                currentData.forEach(row => {
-                    const group = row[groupBy];
-                    if (!groups[group]) groups[group] = [];
-                    groups[group].push(row);
-                });
-                
-                // Create trace for each group
-                Object.entries(groups).forEach(([groupName, groupData]) => {
-                    traces.push({
-                        x: groupData.map(row => row[xAxis]),
-                        y: groupData.map(row => row[yAxis]),
-                        name: groupName,
-                        type: chartType === 'line' ? 'scatter' : chartType,
-                        mode: chartType === 'line' ? 'lines+markers' : chartType === 'scatter' ? 'markers' : undefined
-                    });
+            filtersContainer.appendChild(groupDiv);
+        });
+
+        filtersContainer.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('change', () => saveTabStateAndDraw(activeTabId));
+        });
+    }
+
+    function filterData(data) {
+        let filtered = [...data];
+        headers.forEach(h => {
+            const colData = data.map(d => d[h]).filter(v => v !== '' && v !== null && v !== undefined);
+            if (!colData.length) return;
+
+            if (isNumericArray(colData)) {
+                const minInput = document.getElementById(`filter_min_${h}`);
+                const maxInput = document.getElementById(`filter_max_${h}`);
+                if (!minInput || !maxInput || minInput.value === '' || maxInput.value === '') return;
+                const minVal = parseFloat(minInput.value);
+                const maxVal = parseFloat(maxInput.value);
+                filtered = filtered.filter(d => {
+                    const val = d[h];
+                    return val >= minVal && val <= maxVal;
                 });
             } else {
-                // Single trace
-                traces.push({
-                    x: currentData.map(row => row[xAxis]),
-                    y: currentData.map(row => row[yAxis]),
-                    type: chartType === 'line' ? 'scatter' : chartType,
-                    mode: chartType === 'line' ? 'lines+markers' : chartType === 'scatter' ? 'markers' : undefined
-                });
-            }
-            
-            const layout = {
-                title: `${yAxis} vs ${xAxis}`,
-                xaxis: { title: xAxis },
-                yaxis: { title: yAxis },
-                height: 600
-            };
-            
-            Plotly.newPlot('plotDiv', traces, layout, {responsive: true});
-        }
-
-        // Event listeners
-        document.getElementById('updatePlot').addEventListener('click', updatePlot);
-        document.getElementById('loadDemo').addEventListener('click', () => loadData(demoData));
-        
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const csv = e.target.result;
-                    const lines = csv.split('\n');
-                    const headers = lines[0].split(',');
-                    const data = [];
-                    
-                    for (let i = 1; i < lines.length; i++) {
-                        if (lines[i].trim()) {
-                            const values = lines[i].split(',');
-                            const row = {};
-                            headers.forEach((header, index) => {
-                                const value = values[index]?.trim();
-                                row[header.trim()] = isNaN(value) ? value : parseFloat(value);
-                            });
-                            data.push(row);
-                        }
-                    }
-                    
-                    loadData(data);
-                };
-                reader.readAsText(file);
+                const sel = document.getElementById(`filter_cat_${h}`);
+                if (!sel) return;
+                const selectedOptions = Array.from(sel.selectedOptions).map(o => o.value);
+                if (selectedOptions.length > 0 && selectedOptions.length < sel.options.length) {
+                    filtered = filtered.filter(d => selectedOptions.includes(d[h]));
+                }
             }
         });
+        return filtered;
+    }
+
+    function getRandomColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+        return `#${"00000".substring(0, 6 - c.length)}${c}`;
+    }
+
+    // --- Tab Management ---
+
+    function createNewTab(name) {
+        return {
+            id: Date.now() + Math.random(),
+            name: name || `Plot ${plotTabs.length + 1}`,
+            xAxis: null, leftYAxes: [], rightYAxes: [], grouping: [],
+            chartType: 'box', showOutliers: true, showDataPoints: false,
+            filters: {}
+        };
+    }
+
+    function renderTabs() {
+        const tabsContainer = document.getElementById('tabsContainer');
+        tabsContainer.innerHTML = '';
+        plotTabs.forEach(tab => {
+            const tabEl = document.createElement('div');
+            tabEl.className = 'tab' + (tab.id === activeTabId ? ' active' : '');
+            tabEl.textContent = tab.name;
+            tabEl.title = 'Click to activate. Right-click to rename. Double-click to delete.';
+            
+            tabEl.onclick = () => activateTab(tab.id);
+            tabEl.oncontextmenu = e => {
+                e.preventDefault();
+                const newName = prompt('Rename tab:', tab.name);
+                if (newName && newName.trim()) {
+                    tab.name = newName.trim();
+                    renderTabs();
+                }
+            };
+            tabEl.ondblclick = e => {
+                e.preventDefault();
+                if (plotTabs.length <= 1) {
+                    showNotification('Action Denied', 'At least one plot tab is required.', 'error');
+                    return;
+                }
+                if (confirm(`Are you sure you want to delete the tab "${tab.name}"?`)) {
+                    const idxToRemove = plotTabs.findIndex(t => t.id === tab.id);
+                    if (idxToRemove !== -1) {
+                        plotTabs.splice(idxToRemove, 1);
+                        if (activeTabId === tab.id) {
+                            activateTab(plotTabs[0].id);
+                        } else {
+                            renderTabs();
+                        }
+                    }
+                }
+            };
+            tabsContainer.appendChild(tabEl);
+        });
+    }
+
+    function activateTab(tabId) {
+        const tab = plotTabs.find(t => t.id === tabId);
+        if (!tab) return;
+        activeTabId = tabId;
+
+        document.getElementById('xAxisSelect').value = tab.xAxis || document.getElementById('xAxisSelect').options[0]?.value || '';
+        Array.from(document.getElementById('leftYAxisSelect').options).forEach(opt => { opt.selected = tab.leftYAxes.includes(opt.value); });
+        Array.from(document.getElementById('rightYAxisSelect').options).forEach(opt => { opt.selected = tab.rightYAxes.includes(opt.value); });
+        Array.from(document.getElementById('groupingSelect').options).forEach(opt => { opt.selected = tab.grouping.includes(opt.value); });
+        document.getElementById('chartTypeSelect').value = tab.chartType;
+        document.getElementById('outlierToggle').checked = tab.showOutliers;
+        document.getElementById('showDataPointsToggle').checked = tab.showDataPoints;
+
+        buildFilters(); 
+        for (const h in tab.filters) {
+            const val = tab.filters[h];
+            if (val === null || val === undefined) continue;
+            if (typeof val === 'object' && 'min' in val) {
+                const minInput = document.getElementById(`filter_min_${h}`);
+                const maxInput = document.getElementById(`filter_max_${h}`);
+                if (minInput && maxInput) {
+                    minInput.value = val.min;
+                    maxInput.value = val.max;
+                }
+            } else if (Array.isArray(val)) {
+                const sel = document.getElementById(`filter_cat_${h}`);
+                if (sel) {
+                    Array.from(sel.options).forEach(opt => { opt.selected = val.includes(opt.value); });
+                }
+            }
+        }
         
-        // Auto-load demo data
-        setTimeout(() => loadData(demoData), 1000);
-    </script>
+        drawPlot();
+        renderTabs();
+    }
+
+    function saveTabStateAndDraw(tabId) {
+        const tab = plotTabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        tab.xAxis = document.getElementById('xAxisSelect').value;
+        tab.leftYAxes = Array.from(document.getElementById('leftYAxisSelect').selectedOptions).map(o => o.value);
+        tab.rightYAxes = Array.from(document.getElementById('rightYAxisSelect').selectedOptions).map(o => o.value);
+        tab.grouping = Array.from(document.getElementById('groupingSelect').selectedOptions).map(o => o.value);
+        tab.chartType = document.getElementById('chartTypeSelect').value;
+        tab.showOutliers = document.getElementById('outlierToggle').checked;
+        tab.showDataPoints = document.getElementById('showDataPointsToggle').checked;
+
+        tab.filters = {};
+        headers.forEach(h => {
+            const minInput = document.getElementById(`filter_min_${h}`);
+            const maxInput = document.getElementById(`filter_max_${h}`);
+            const sel = document.getElementById(`filter_cat_${h}`);
+            if (minInput && maxInput) {
+                tab.filters[h] = { min: parseFloat(minInput.value), max: parseFloat(maxInput.value) };
+            } else if (sel) {
+                tab.filters[h] = Array.from(sel.selectedOptions).map(o => o.value);
+            }
+        });
+
+        drawPlot(tab);
+    }
+    
+    // --- Plotting ---
+
+    function buildTracesAndLayout(data, xKey, leftYKeys, rightYKeys, groupingKeys, chartType, showOutliers, showDataPoints) {
+        const traces = [];
+        const layout = {};
+        const defaultSymbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'star', 'hexagon', 'pentagon'];
+        const xIsCategorical = !isNumericArray(data.map(d => d[xKey]));
+
+        const groups = {};
+        if (groupingKeys.length === 0) {
+            groups['All Data'] = data;
+        } else {
+            data.forEach(d => {
+                const groupName = groupingKeys.map(k => (d[k] ?? 'Unknown')).join(', ');
+                if (!groups[groupName]) groups[groupName] = [];
+                groups[groupName].push(d);
+            });
+        }
+        
+        const groupNames = Object.keys(groups);
+        const numGroups = groupNames.length;
+        const xCategories = xIsCategorical ? [...new Set(data.map(d => d[xKey]))].sort() : [];
+        const xMap = {};
+        xCategories.forEach((cat, i) => xMap[cat] = i);
+
+        const processYKey = (yKey, axisId, axisSide, axisPosition) => {
+            layout[axisId === 'y' ? 'yaxis' : `yaxis${axisId.substring(1)}`] = {
+                title: { text: yKey },
+                overlaying: axisId === 'y' ? undefined : 'y',
+                side: axisSide,
+                position: axisPosition,
+                zeroline: false
+            };
+            
+            groupNames.forEach((groupName, groupIdx) => {
+                const groupData = groups[groupName];
+                let legendKey = `${groupName} - ${yKey}`;
+                const symbol = defaultSymbols[groupIdx % defaultSymbols.length];
+                
+                if ((chartType === 'box' || chartType === 'violin') && showDataPoints) {
+                    const validYData = groupData.map(d => d[yKey]).filter(y => y !== null && y !== undefined && y !== '' && !isNaN(y));
+                    const pointCount = validYData.length;
+                    legendKey += ` (n=${pointCount})`;
+                }
+                
+                const traceBase = {
+                    name: legendKey,
+                    yaxis: axisId,
+                    marker: { 
+                        color: getRandomColor(legendKey),
+                        symbol: symbol,
+                    }
+                };
+                
+                if (chartType === 'box' || chartType === 'violin') {
+                    traces.push({ 
+                        ...traceBase, 
+                        x: groupData.map(d => d[xKey]), 
+                        y: groupData.map(d => d[yKey]), 
+                        type: chartType, 
+                        boxpoints: chartType === 'box' ? (showOutliers ? 'outliers' : false) : 'all' 
+                    });
+
+                } else if (chartType === 'bar') {
+                    const xGrouped = {};
+                    groupData.forEach(d => {
+                        const xVal = d[xKey] ?? 'Unknown';
+                        if (!xGrouped[xVal]) xGrouped[xVal] = [];
+                        if(!isNaN(d[yKey])) xGrouped[xVal].push(d[yKey]);
+                    });
+                    const xs = Object.keys(xGrouped).sort();
+                    const ys = xs.map(x => xGrouped[x].length > 0 ? xGrouped[x].reduce((a,b) => a+b, 0) / xGrouped[x].length : 0);
+                    traces.push({ ...traceBase, x: xs, y: ys, type: 'bar' });
+                } else if (chartType === 'scatter' || chartType === 'line') {
+                    let xVals = groupData.map(d => d[xKey]);
+                    let yVals = groupData.map(d => d[yKey]);
+                    
+                    if (chartType === 'line' && !xIsCategorical) {
+                        const sortedPairs = groupData.map(d => [d[xKey], d[yKey]]).sort((a, b) => a[0] - b[0]);
+                        xVals = sortedPairs.map(p => p[0]);
+                        yVals = sortedPairs.map(p => p[1]);
+                    }
+
+                    if (chartType === 'scatter' && numGroups > 1 && xIsCategorical) {
+                        const jitterWidth = 0.8; 
+                        const groupWidth = jitterWidth / numGroups;
+                        const offset = (groupIdx - (numGroups - 1) / 2) * groupWidth;
+                        xVals = groupData.map(d => xMap[d[xKey]] + offset);
+                    }
+                    
+                    traces.push({ ...traceBase, x: xVals, y: yVals, mode: chartType === 'scatter' ? 'markers' : 'lines+markers', type: 'scatter' });
+                }
+            });
+        };
+
+        // Left axes: y, y3, y5, ...
+        leftYKeys.forEach((yKey, i) => {
+            const axisNum = i * 2 + 1;
+            const axisId = axisNum === 1 ? 'y' : `y${axisNum}`;
+            const position = 0 + (i > 0 ? (i-1) * 0.08 : 0);
+            processYKey(yKey, axisId, 'left', position);
+        });
+
+        // Right axes: y2, y4, y6, ...
+        rightYKeys.forEach((yKey, i) => {
+            const axisNum = (i + 1) * 2;
+            const axisId = `y${axisNum}`;
+            const position = 1 - (i * 0.08);
+            processYKey(yKey, axisId, 'right', position);
+        });
+        
+        if(leftYKeys.length === 0 && rightYKeys.length > 0) {
+            layout.yaxis = { ...layout.yaxis2, title: { text: '' }, showticklabels: false };
+            delete layout.yaxis2;
+            traces.forEach(t => { if(t.yaxis === 'y2') t.yaxis = 'y'; });
+        }
+        
+        if (chartType === 'scatter' && numGroups > 1 && xIsCategorical) {
+            layout.xaxis = {
+                tickvals: xCategories.map((_, i) => i),
+                ticktext: xCategories
+            };
+        }
+
+        return { traces, layoutYAxes: layout };
+    }
+
+    function drawPlot(tab) {
+        if (!parsedData.length) {
+            Plotly.purge(document.getElementById('plot'));
+            return;
+        }
+        tab = tab || plotTabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+        
+        const isBoxPlot = tab.chartType === 'box';
+        const isBoxLike = isBoxPlot || tab.chartType === 'violin';
+        document.getElementById('outlierToggleContainer').style.display = isBoxPlot ? 'flex' : 'none';
+        document.getElementById('dataPointsToggleContainer').style.display = isBoxLike ? 'flex' : 'none';
+
+        const xKey = tab.xAxis;
+        const leftYKeys = tab.leftYAxes;
+        const rightYKeys = tab.rightYAxes;
+
+        if (!xKey || (leftYKeys.length === 0 && rightYKeys.length === 0)) {
+            Plotly.purge(document.getElementById('plot'));
+            document.getElementById('plot').innerHTML = `<div class="empty-state">Please select at least one X and one Y axis to generate a plot.</div>`;
+            return;
+        }
+
+        const filteredData = filterData(parsedData);
+        if (!filteredData.length) {
+            Plotly.purge(document.getElementById('plot'));
+            document.getElementById('plot').innerHTML = `<div class="empty-state">Your current filters result in no data to display. Please adjust your filters.</div>`;
+            return;
+        }
+
+        const { traces, layoutYAxes } = buildTracesAndLayout(filteredData, xKey, leftYKeys, rightYKeys, tab.grouping, tab.chartType, tab.showOutliers, tab.showDataPoints);
+        
+        const layout = {
+            title: { text: `${capitalize(tab.chartType)} Plot: ${[...leftYKeys, ...rightYKeys].join(', ')} vs ${xKey}`, font: { size: 18, family: 'Inter, sans-serif' } },
+            xaxis: { title: { text: xKey }, tickangle: -45, domain: [0.1 * leftYKeys.length, 1 - 0.1 * rightYKeys.length]},
+            margin: { t: 50, b: 120, l: 60, r: 60 },
+            height: 600,
+            boxmode: ['box', 'violin', 'bar'].includes(tab.chartType) ? 'group' : undefined,
+            legend: { orientation: 'h', y: -0.3, x: 0.5, xanchor: 'center' }
+        };
+        Object.assign(layout, layoutYAxes);
+
+        Plotly.newPlot(document.getElementById('plot'), traces, layout, { responsive: true, displaylogo: false });
+    }
+
+    // --- Data Loading and Initialization ---
+
+    function loadCurrentData() {
+        try {
+            const inputText = document.getElementById('dataInput').value;
+            if (!inputText.trim()) {
+                throw new Error('Please paste some data or load sample data.');
+            }
+            
+            parsedData = parseTabDelimited(inputText);
+            if (!parsedData.length) throw new Error('No data rows found.');
+            
+            populateSelect(document.getElementById('xAxisSelect'), headers);
+            populateSelect(document.getElementById('leftYAxisSelect'), headers, true);
+            populateSelect(document.getElementById('rightYAxisSelect'), headers, true);
+            populateSelect(document.getElementById('groupingSelect'), headers, true);
+            
+            const numericHeaders = headers.filter(h => isNumericArray(parsedData.map(d => d[h])));
+            const categoricalHeaders = headers.filter(h => !numericHeaders.includes(h));
+
+            document.getElementById('xAxisSelect').value = categoricalHeaders[0] || headers[0];
+            if (numericHeaders.length > 0) {
+                 Array.from(document.getElementById('leftYAxisSelect').options).forEach(o => o.selected = numericHeaders[0] === o.value);
+            }
+            if (numericHeaders.length > 1) {
+                Array.from(document.getElementById('rightYAxisSelect').options).forEach(o => o.selected = numericHeaders[1] === o.value);
+            }
+            
+            buildFilters();
+            enableControls(true);
+
+            if (plotTabs.length === 0) {
+                const firstTab = createNewTab('Plot 1');
+                plotTabs.push(firstTab);
+            }
+            const currentActiveId = activeTabId || plotTabs[0].id;
+            saveTabStateAndDraw(currentActiveId);
+            activateTab(currentActiveId); 
+            
+            showNotification('Data Loaded', `${parsedData.length} rows parsed successfully.`, 'success');
+
+        } catch (err) {
+            showNotification('Parsing Error', err.message, 'error');
+            enableControls(false);
+            Plotly.purge(document.getElementById('plot'));
+        }
+    }
+
+    function enableControls(enabled) {
+        const elements = [
+            document.getElementById('xAxisSelect'), 
+            document.getElementById('leftYAxisSelect'), 
+            document.getElementById('rightYAxisSelect'), 
+            document.getElementById('groupingSelect'), 
+            document.getElementById('chartTypeSelect'), 
+            document.getElementById('outlierToggle'), 
+            document.getElementById('showDataPointsToggle'), 
+            document.getElementById('exportPlotBtn'), 
+            document.getElementById('addPlotTabBtn')
+        ];
+        elements.forEach(el => el.disabled = !enabled);
+    }
+
+    function loadSampleData() {
+        const sampleData = `Displacement,Pull Load (N),Temperature (C),Adhesive,Test Case
+0.1,150,25,Fuller,RT
+0.2,310,25,Fuller,RT
+0.3,450,25,Fuller,RT
+0.4,620,25,Fuller,RT
+0.5,780,25,Fuller,RT
+0.6,900,25,Fuller,RT
+0.1,120,-40,Sika,Cold
+0.2,250,-40,Sika,Cold
+0.3,380,-40,Sika,Cold
+0.4,510,-40,Sika,Cold
+0.5,630,-40,Sika,Cold
+0.6,740,-40,Sika,Cold
+0.1,180,80,Dow,Hot
+0.2,350,80,Dow,Hot
+0.3,530,80,Dow,Hot
+0.4,710,80,Dow,Hot
+0.5,880,80,Dow,Hot
+0.6,1050,80,Dow,Hot`;
+        
+        document.getElementById('dataInput').value = sampleData;
+        loadCurrentData();
+    }
+
+    // --- Event Listeners ---
+
+    document.getElementById('loadDataBtn').addEventListener('click', loadCurrentData);
+    document.getElementById('loadSampleBtn').addEventListener('click', loadSampleData);
+
+    document.getElementById('fileInput').addEventListener('change', evt => {
+        if (!evt.target.files.length) return;
+        const file = evt.target.files[0];
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('dataInput').value = e.target.result;
+            loadCurrentData();
+        };
+        reader.onerror = () => showNotification('File Error', 'Could not read the selected file.', 'error');
+        reader.readAsText(file);
+        evt.target.value = ''; 
+    });
+
+    [document.getElementById('xAxisSelect'), document.getElementById('leftYAxisSelect'), document.getElementById('rightYAxisSelect'), document.getElementById('groupingSelect'), document.getElementById('chartTypeSelect'), document.getElementById('outlierToggle'), document.getElementById('showDataPointsToggle')].forEach(el => {
+        el.addEventListener('change', () => saveTabStateAndDraw(activeTabId));
+    });
+
+    document.getElementById('addPlotTabBtn').addEventListener('click', () => {
+      const newTab = createNewTab();
+      const activeTab = plotTabs.find(t => t.id === activeTabId);
+      if(activeTab) Object.assign(newTab, { ...activeTab, id: newTab.id, name: newTab.name });
+      plotTabs.push(newTab);
+      activateTab(newTab.id);
+    });
+
+    document.getElementById('exportPlotBtn').addEventListener('click', () => {
+        const activeTab = plotTabs.find(t => t.id === activeTabId);
+        if (!activeTab) return;
+        const filename = `plot_${Date.now()}`;
+        Plotly.downloadImage(document.getElementById('plot'), {format: 'png', width: 1200, height: 800, filename: filename});
+    });
+
+    // --- Auto-load sample data on page load ---
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            loadSampleData();
+        }, 1000);
+    });
+  </script>
 </body>
 </html>
