@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIDP Enhanced - Advanced Interactive Data Plotter</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="ml-3 text-xl font-bold text-gray-900">AIDP Enhanced</h1>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        v2.0.0
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="datasetManagerBtn" class="btn btn-secondary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7M4 7c0-2.21 1.79-4 4-4h8c2.21 0 4-1.79 4-4M4 7h16m-4 4v6m-4-6v6m-4-6v6"></path>
+                        </svg>
+                        Datasets
+                    </button>
+                    <button id="templatesBtn" class="btn btn-secondary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
+                        Templates
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Quick Start Section -->
+        <div id="quickStartSection" class="mb-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+                <h2 class="text-2xl font-bold mb-2">Welcome to AIDP Enhanced</h2>
+                <p class="text-indigo-100 mb-4">Get started by uploading your data or choosing from our templates</p>
+                <div class="flex space-x-4">
+                    <button id="quickUploadBtn" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-50 transition-colors">
+                        Quick Upload
+                    </button>
+                    <button id="browseTemplatesBtn" class="border border-white text-white px-4 py-2 rounded-lg font-medium hover:bg-white hover:text-indigo-600 transition-colors">
+                        Browse Templates
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Data Upload Section -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Upload</h3>
+                    <div id="dataUploadComponent"></div>
+                </div>
+
+                <!-- Smart Suggestions -->
+                <div id="suggestionsCard" class="card hidden">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Smart Suggestions</h3>
+                    <div id="smartSuggestions"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button id="exportPlotBtn" class="btn btn-green w-full" disabled>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            Export Plot
+                        </button>
+                        <button id="saveVisualizationBtn" class="btn btn-purple w-full" disabled>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            Save Visualization
+                        </button>
+                        <button id="generateReportBtn" class="btn btn-indigo w-full" disabled>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Panel -->
+                <div id="statisticsCard" class="card hidden">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Statistics</h3>
+                    <div id="statisticsContent"></div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Plot Configuration -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Plot Configuration</h3>
+                        <div class="flex space-x-2">
+                            <button id="addPlotTabBtn" class="btn btn-secondary" disabled>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Add Tab
+                            </button>
+                            <button id="configAssistantBtn" class="btn btn-secondary" disabled>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Assistant
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuration Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">X-Axis</label>
+                            <select id="xAxisSelect" class="form-select" disabled>
+                                <option value="">Select column...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Left Y-Axis</label>
+                            <select id="leftYAxisSelect" class="form-select" multiple disabled>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Right Y-Axis</label>
+                            <select id="rightYAxisSelect" class="form-select" multiple disabled>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Group By</label>
+                            <select id="groupingSelect" class="form-select" multiple disabled>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Chart Type</label>
+                            <select id="chartTypeSelect" class="form-select" disabled>
+                                <option value="box">Box Plot</option>
+                                <option value="violin">Violin Plot</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="scatter">Scatter Plot</option>
+                                <option value="line">Line Chart</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="showOutliersToggle" class="form-checkbox" disabled>
+                                    <span class="ml-2 text-sm text-gray-700">Outliers</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="showDataPointsToggle" class="form-checkbox" disabled>
+                                    <span class="ml-2 text-sm text-gray-700">Data Points</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Advanced Filters</h3>
+                    <div id="filterBuilderComponent"></div>
+                </div>
+
+                <!-- Plot Area -->
+                <div class="card">
+                    <div id="plotTabsContainer" class="border-b border-gray-200 mb-4"></div>
+                    <div id="plotContainer" class="min-h-[600px]">
+                        <div class="flex items-center justify-center h-96 text-gray-500">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <p class="text-lg font-medium">No data loaded</p>
+                                <p class="text-sm">Upload a dataset to start creating visualizations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="datasetModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-semibold">Dataset Manager</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="datasetList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="templatesModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-semibold">Visualization Templates</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="templatesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Scripts -->
+    <script src="static/js/components/dataUpload.js"></script>
+    <script src="static/js/components/filterBuilder.js"></script>
+    <script src="static/js/components/configAssistant.js"></script>
+    <script src="static/js/dataProcessor.js"></script>
+    <script src="static/js/plotRenderer.js"></script>
+    <script src="static/js/main.js"></script>
+</body>
+</html>
