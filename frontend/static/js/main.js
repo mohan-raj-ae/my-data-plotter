@@ -1,7 +1,7 @@
 // Main application controller
 class AIDPApp {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:5000/api';
+        this.apiBaseUrl = 'https://possessed-crypt-x5ggwwgj4rg9hpp6x-5000.app.github.dev/api';
         this.currentDataset = null;
         this.currentVisualization = null;
         this.plotTabs = [];
