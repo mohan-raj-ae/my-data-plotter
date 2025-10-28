@@ -143,45 +143,11 @@ class FilterBuilderComponent {
         if (!column) return '';
         
         if (filter.type === 'numeric') {
-            if (filter.operator === 'between') {
-                return `
-                    <div class="flex space-x-2">
-                        <input type="number" class="form-input flex-1" placeholder="Min" 
-                               data-filter-id="${filter.id}" data-field="minValue" 
-                               value="${filter.minValue || ''}">
-                        <input type="number" class="form-input flex-1" placeholder="Max" 
-                               data-filter-id="${filter.id}" data-field="maxValue" 
-                               value="${filter.maxValue || ''}">
-                    </div>
-                `;
-            } else {
-                return `
-                    <input type="number" class="form-input w-full" placeholder="Value" 
-                           data-filter-id="${filter.id}" data-field="value" 
-                           value="${filter.value || ''}">
-                `;
-            }
-        } else if (filter.type === 'categorical') {
-            if (filter.operator === 'in') {
-                const options = column.sample_values.map(val => 
-                    `<option value="${val}">${val}</option>`
-                ).join('');
-                return `
-                    <select multiple class="form-select w-full" data-filter-id="${filter.id}" data-field="values">
-                        ${options}
-                    </select>
-                `;
-            } else {
-                const options = column.sample_values.map(val => 
-                    `<option value="${val}" ${val === filter.value ? 'selected' : ''}>${val}</option>`
-                ).join('');
-                return `
-                    <select class="form-select w-full" data-filter-id="${filter.id}" data-field="value">
-                        <option value="">Select value...</option>
-                        ${options}
-                    </select>
-                `;
-            }
+            return `
+                <input type="number" class="form-input w-full" placeholder="Value" 
+                       data-filter-id="${filter.id}" data-field="value" 
+                       value="${filter.value || ''}">
+            `;
         }
         
         return `
@@ -195,21 +161,13 @@ class FilterBuilderComponent {
         if (type === 'numeric') {
             return [
                 { value: 'equals', label: 'Equals' },
-                { value: 'not_equals', label: 'Not Equals' },
                 { value: 'greater_than', label: 'Greater Than' },
-                { value: 'less_than', label: 'Less Than' },
-                { value: 'greater_equal', label: 'Greater or Equal' },
-                { value: 'less_equal', label: 'Less or Equal' },
-                { value: 'between', label: 'Between' }
+                { value: 'less_than', label: 'Less Than' }
             ];
         } else {
             return [
                 { value: 'equals', label: 'Equals' },
-                { value: 'not_equals', label: 'Not Equals' },
-                { value: 'contains', label: 'Contains' },
-                { value: 'starts_with', label: 'Starts With' },
-                { value: 'ends_with', label: 'Ends With' },
-                { value: 'in', label: 'In List' }
+                { value: 'contains', label: 'Contains' }
             ];
         }
     }
@@ -243,11 +201,5 @@ class FilterBuilderComponent {
     
     getFilters() {
         return this.filters;
-    }
-    
-    clearFilters() {
-        this.filters = [];
-        this.renderFilters();
-        this.onFiltersChange();
     }
 }
