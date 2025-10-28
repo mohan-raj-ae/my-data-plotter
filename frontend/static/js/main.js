@@ -103,10 +103,10 @@ class AIDPApp {
             () => this.updatePlot()
         );
         
-        // Initialize config assistant
-        this.configAssistant = new ConfigAssistantComponent(
-            (config) => this.applyConfiguration(config)
-        );
+        // Initialize config assistant (placeholder)
+        this.configAssistant = {
+            show: () => console.log('Config assistant not implemented yet')
+        };
     }
     
     async loadTemplates() {
@@ -370,12 +370,6 @@ class AIDPApp {
             tabElement.className = `tab ${tab.id === this.activeTabId ? 'active' : ''}`;
             tabElement.textContent = tab.name;
             tabElement.onclick = () => this.activateTab(tab.id);
-            
-            // Add context menu for tab management
-            tabElement.oncontextmenu = (e) => {
-                e.preventDefault();
-                this.showTabContextMenu(e, tab);
-            };
             
             tabList.appendChild(tabElement);
         });
