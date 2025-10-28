@@ -12,7 +12,7 @@ import io
 import base64
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['*'], allow_headers=['Content-Type'], methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 
 # Configuration
 UPLOAD_FOLDER = 'data/uploads'
