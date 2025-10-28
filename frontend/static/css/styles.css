@@ -1,0 +1,275 @@
+/* Custom styles for AIDP Enhanced */
+:root {
+    --primary-50: #eff6ff;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-700: #1d4ed8;
+    --primary-900: #1e3a8a;
+    
+    --success-500: #10b981;
+    --success-600: #059669;
+    
+    --warning-500: #f59e0b;
+    --warning-600: #d97706;
+    
+    --error-500: #ef4444;
+    --error-600: #dc2626;
+    
+    --purple-500: #8b5cf6;
+    --purple-600: #7c3aed;
+    
+    --indigo-500: #6366f1;
+    --indigo-600: #4f46e5;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Card Component */
+.card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+}
+
+/* Button Components */
+.btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn svg {
+    @apply -ml-1 mr-2;
+}
+
+.btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.btn-green {
+    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+.btn-purple {
+    @apply bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500;
+}
+
+.btn-indigo {
+    @apply bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+/* Form Components */
+.form-select {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500;
+}
+
+.form-checkbox {
+    @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}
+
+.form-input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Upload Zone */
+.upload-zone {
+    @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer;
+}
+
+.upload-zone.dragover {
+    @apply border-blue-500 bg-blue-50;
+}
+
+.upload-zone-content {
+    @apply space-y-2;
+}
+
+.upload-zone-icon {
+    @apply w-12 h-12 mx-auto text-gray-400;
+}
+
+/* Progress Bar */
+.progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar-fill {
+    @apply bg-blue-600 h-2 rounded-full transition-all duration-300;
+}
+
+/* Tabs */
+.tab-list {
+    @apply flex border-b border-gray-200;
+}
+
+.tab {
+    @apply px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent cursor-pointer transition-colors;
+}
+
+.tab.active {
+    @apply text-blue-600 border-blue-500;
+}
+
+/* Modal */
+.modal {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    @apply relative bg-white rounded-lg shadow-xl mx-auto my-8 max-w-2xl;
+}
+
+.modal-header {
+    @apply flex justify-between items-center p-6 border-b border-gray-200;
+}
+
+.modal-body {
+    @apply p-6;
+}
+
+.modal-close {
+    @apply text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer;
+}
+
+/* Notifications */
+.notification {
+    @apply max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden;
+}
+
+.notification-success {
+    @apply border-l-4 border-green-500;
+}
+
+.notification-error {
+    @apply border-l-4 border-red-500;
+}
+
+.notification-warning {
+    @apply border-l-4 border-yellow-500;
+}
+
+.notification-info {
+    @apply border-l-4 border-blue-500;
+}
+
+/* Filter Builder */
+.filter-group {
+    @apply border border-gray-200 rounded-lg p-4 space-y-3;
+}
+
+.filter-condition {
+    @apply flex items-center space-x-2;
+}
+
+/* Suggestion Cards */
+.suggestion-card {
+    @apply border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all;
+}
+
+.suggestion-card.selected {
+    @apply border-blue-500 bg-blue-50;
+}
+
+/* Statistics Display */
+.stat-item {
+    @apply flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0;
+}
+
+.stat-label {
+    @apply text-sm font-medium text-gray-600;
+}
+
+.stat-value {
+    @apply text-sm text-gray-900 font-mono;
+}
+
+/* Template Cards */
+.template-card {
+    @apply border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all;
+}
+
+.template-category {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card {
+        @apply p-4;
+    }
+    
+    .btn {
+        @apply text-xs px-3 py-1.5;
+    }
+    
+    .modal-content {
+        @apply mx-4;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading States */
+.loading {
+    @apply opacity-50 pointer-events-none;
+}
+
+.spinner {
+    @apply animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full;
+}
+
+/* Data Preview Table */
+.data-preview-table {
+    @apply w-full text-sm;
+}
+
+.data-preview-table th {
+    @apply px-3 py-2 text-left font-medium text-gray-700 bg-gray-50 border-b border-gray-200;
+}
+
+.data-preview-table td {
+    @apply px-3 py-2 border-b border-gray-100;
+}
+
+/* Plot Customization */
+.customization-panel {
+    @apply space-y-4;
+}
+
+.customization-section {
+    @apply border border-gray-200 rounded-lg p-4;
+}
+
+.customization-section h4 {
+    @apply text-sm font-medium text-gray-900 mb-3;
+}
